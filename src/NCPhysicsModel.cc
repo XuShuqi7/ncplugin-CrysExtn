@@ -358,6 +358,57 @@ namespace NCPluginNamespace {
       }
     }
 
+    double BC_mod_extn_mdl( double Nc, double wl, double F_hkl, double l,
+                            double d_hkl, double g, double L, int tilt_dist ) {
+
+      //Calculation of mixed primary or secondary extinction factor y using the MODIFIED model of Becker & Coppens
+      //Only SECONDARY extinction can happen, but is characterized by l and g
+      //Nc : number of unit cells per unit volume, Aa^-3
+      //wl : wavelength, Aa
+      //F_hkl : |F_hkl|, modulus of the structure factor per unit cell, Aa
+      //l : "t", mean path length through a perfect crystal, equivalent to block size, Aa
+      //d_hkl : dspacing for the hkl plan, Aa
+      //g : width parameter of the mosaic distribution, dimensionless
+      //L : "T-bar", mean path length through a mosaic crystal, Aa
+      //tilt_dist : option for the calculation of A(theta) and B(theta),
+      //1, 2, 3 for orientation of crystallite following a Gaussian, Lorentzian
+      //or Fresnel distribution, respectively
+
+      double sin_theta = 0.5 * wl / d_hkl; //2*d_hkl*sin(theta_hkl)=lambda
+      if ( sin_theta >= -1. && sin_theta <= 1. ) {
+        double cos_theta  = std::sqrt(1. - NC::ncsquare(sin_theta));
+        double sin_2theta = 2. * sin_theta * cos_theta;
+        double cos_2theta = 1. - 2. * NC::ncsquare(sin_theta);
+        //double Q_theta = NC::ncsquare(Nc * wl * F_hkl) * wl / sin_2theta; //same as in Sabine's model
+        double Q_theta = NC::ncsquare(Nc * wl * F_hkl) * wl; //division by sin_2theta to be done later
+
+        //primary
+        ABpair AB_theta_p = calc_AB_theta( cos_2theta, 0 );
+        //double xp = 2. / 3. * Q_theta * l * l * sin_2theta / wl;
+        //double xp = 2. / 3. * Q_theta * l * l / wl;
+        //double yp = 1. / std::sqrt(1. + 2. * xp + AB_theta_p.A * NC::ncsquare(xp) / (1. + AB_theta_p.B * xp));
+        double yp = 1.; //No primary extinction
+
+        ABpair AB_theta_s = calc_AB_theta( cos_2theta, tilt_dist );
+        double xs, ys;
+        if ( l < 1.e-9 ) {
+          xs = 0.;
+          ys = 1.; //becomes pure primary
+        }
+        else {
+          //xs = 2. / 3. * Q_theta * L / std::sqrt(NC::ncsquare(wl / l / sin_2theta) + 1. / (2. * g * g));
+          xs = 2. / 3. * Q_theta * L / std::sqrt(NC::ncsquare(wl / l) + NC::ncsquare(sin_2theta) / (2. * g * g));
+          ys = 1. / std::sqrt(1. + 2.12 * xs + AB_theta_s.A * NC::ncsquare(xs) / (1. + AB_theta_s.B * xp));
+        }
+
+        return yp * ys;
+      }
+      else {
+
+        return 1.;
+      }
+    }
+
     // ************************************************************* //
     // ******************  RED model  ****************************** //
     // ************************************************************* //
@@ -523,6 +574,8 @@ NCP::CrystallineExtinction NCP::CrystallineExtinction::createFromInfo( const NC:
   //   RED_orig  l  R  T
   // or
   //   RED  l  R  T  c
+  // or
+  //   BC_mod  l  g  L  Gauss/Lorentz/Fresnel
   //
 
   //Two cases: one/two lines
@@ -561,6 +614,9 @@ NCP::CrystallineExtinction NCP::CrystallineExtinction::createFromInfo( const NC:
   else if ( data.at(0).at(0).compare("RED") == 0 ) {
     model_option = 5;
   }
+  else if ( data.at(0).at(0).compare("BC_mod") == 0 ) {
+    model_option = 6;
+  }
   else {
     NCRYSTAL_THROW2(BadInput,"Only the Sabine uncorrelated block model (Sabine_uncorr), the correlated block model (Sabine_corr), the BC models (BC_pure and BC_mix), and the random elastic deformation models (RED_orig and RED), are supported, please check the input file.");
   }
@@ -598,7 +654,7 @@ NCP::CrystallineExtinction NCP::CrystallineExtinction::createFromInfo( const NC:
       NCRYSTAL_THROW2( BadInput,"Invalid values/strings specified in the @CUSTOM_"<<pluginNameUpperCase()
                        <<" l, Gg and L should be three positive floating point values." );
   }
-  else if ( model_option == 2 || model_option == 3 ) {
+  else if ( model_option == 2 || model_option == 3 || model_option == 6 ) {
     if (   ! NC::safe_str2dbl( data.at(0).at(1), l  )
            || ! NC::safe_str2dbl( data.at(0).at(2), Gg )
            || ! NC::safe_str2dbl( data.at(0).at(3), L  )
@@ -758,8 +814,11 @@ double NCP::CrystallineExtinction::calcCrossSection( double neutron_ekin ) const
     else if ( m_model_option == 4 ) {
       E_hkl = red_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, -1 );
     }
-    else{
+    else if ( m_model_option == 5 ) {
       E_hkl = red_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_c );
+    }
+    else {
+      E_hkl = BC_mod_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
     }
 
     if ( m_res_option == 1 )
@@ -886,8 +945,11 @@ NCP::CrystallineExtinction::ScatEvent NCP::CrystallineExtinction::sampleScatteri
     else if ( m_model_option == 4 ) {
       E_hkl = red_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, -1 );
     }
-    else {
+    else if ( m_model_option == 5 ) {
       E_hkl = red_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_c );
+    }
+    else {
+      E_hkl = BC_mod_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
     }
     if ( m_res_option == 1 )
       R_hkl = jorgensen( wl, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 1 );
