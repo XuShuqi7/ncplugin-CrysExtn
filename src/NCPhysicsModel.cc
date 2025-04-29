@@ -474,13 +474,15 @@ namespace NCPluginNamespace {
         double cos_theta  = std::sqrt(1. - NC::ncsquare(sin_theta));
         double sin_2theta = 2. * sin_theta * cos_theta;
         double cos_2theta = 1. - 2. * NC::ncsquare(sin_theta);
-        //double Q_theta = NC::ncsquare(Nc * wl * F_hkl) * wl / sin_2theta; //same as in Sabine's model 
-	double Q_theta = NC::ncsquare(Nc * wl * F_hkl) * wl; //remove the factor of sin_2theta
+        double Q_theta = NC::ncsquare(Nc * wl * F_hkl) * wl / sin_2theta; //same as in Sabine's model 
 	
 	double r = 2./ 3. * l; //r is the domain ratio
-        double rstar = r / std::sqrt(1. + (r / wl / g) * (r / wl / g));
-	double x = 3. / 2. * Q_theta / wl * (r * r + (2. / 3. * L - r) * rstar); //eq. (8) of Acta Cryst. (1976). A32, 806
-	
+        //double rstar = r / std::sqrt(1. + (r / wl / g) * (r / wl / g));
+	//double x = 3. / 2. * Q_theta / wl * (r * r + (2. / 3. * L - r) * rstar); //eq. (8) of Acta Cryst. (1976). A32, 806
+	//modifications based on debates in the literature: multiply by sin(2theta) in the formula
+	double rstar = r / std::sqrt(1. + (r * sin_2theta / wl / g) * (r * sin_2theta / wl / g));
+	double x = 3. / 2. * Q_theta * sin_2theta / wl * (r * r + (2. / 3. * L - r) * rstar);
+	      
 	double ftheta = 1. + 1. / 3. * std::pow(sin_theta, 2.5); //eq. (20d) of Acta Cryst. (1970). A26, 214
 
         double sqrt3xftheta    = std::sqrt(3 * x * ftheta);
