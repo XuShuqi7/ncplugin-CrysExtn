@@ -873,7 +873,7 @@ double NCP::CrystallineExtinction::calcCrossSection( double neutron_ekin ) const
       E_hkl = BC_mod_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
     }
     else {
-      E_hkl = cooper_rouse_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, mu, m_Gg, m_L );
+      E_hkl = cooper_rouse_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L );
     }
 
     if ( m_res_option == 1 )
@@ -1007,7 +1007,7 @@ NCP::CrystallineExtinction::ScatEvent NCP::CrystallineExtinction::sampleScatteri
       E_hkl = BC_mod_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
     }
     else {
-      E_hkl = cooper_rouse_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, mu, m_Gg, m_L );
+      E_hkl = cooper_rouse_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L );
     }
     if ( m_res_option == 1 )
       R_hkl = jorgensen( wl, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 1 );
