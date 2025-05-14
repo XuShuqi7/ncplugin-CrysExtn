@@ -8,7 +8,7 @@ It should also be noted that extinction can be classified into two types: primar
 
 The extinction models implemented in this plugin have been investigated for the transmission measurements performed on four different beryllium grades using the HIPPO instrument at Los Alamos National Laboratory, and the experimental cross-sections were interpreted using Becker & Coppens' model. 
 
-For more details, and if you use this plugin for your work, please refer and cite this publication: **Impact of extinction effects on neutron transmission and diffraction in solid beryllium metal, Journal of Applied Crystallography**.
+For more details, and if you use this plugin for your work, please refer and cite this publication: **Impact of extinction effects on neutron transmission and diffraction in solid beryllium metal, Journal of Applied Crystallography (under revision)**.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Sabine's model is further classified as uncorrelated and correlated block models
 @CUSTOM_CRYSEXTN
   Sabine_uncorr  l  G  L  rect/tri
 ```
-where `Sabine_uncorr` represents Sabine's uncorrelated block model which assumes no correlations between primary and secondary extinction effects, `l` is the crystallite size in unit of Aa, `G` represents the mosacity parameter in unit of 1/rad, L is the average grain size (Aa), `rect/tri` represents the option for the distribution for the tilts between mosaic blocks, either rectangular or triangular distribution.
+where `Sabine_uncorr` represents Sabine's uncorrelated block model which assumes no correlations between primary and secondary extinction effects, `l` is the crystallite size in unit of Aa, `G` represents the mosacity parameter in unit of 1/rad, L is the grain size (Aa), `rect/tri` represents the option for the distribution for the tilts between mosaic blocks, either rectangular or triangular distribution.
 
 ```
 @CUSTOM_CRYSEXTN
@@ -46,7 +46,39 @@ BC's extinction model is classified as both primary and secondary, pure primary,
 @CUSTOM_CRYSEXTN
   BC_mix  l  g  L  Gauss/Lorentz/Fresnel
 ```
-where `BC_mix` represents both primary and secondary extinction, `l` is the average path length through a crystallite (Aa), `g` is the mosacity parameter (1/rad), `L` is the average path length through a grain (Aa), and `Gauss/Lorentz/Fresnel` represents the option for the quantities $A(\theta)$ and $B(\theta)$ involved in the calculation of secondary extinction.
+where `BC_mix` represents both primary and secondary extinction, `l` is the average path length through a crystallite (Aa), `g` is the mosacity parameter (1/rad), `L` is the average path length through a grain (Aa), and `Gauss/Lorentz/Fresnel` represents the option for calculating the quantities $A(\theta)$ and $B(\theta)$ involved in secondary extinction. For spherical domains, the average path length is related to the radius through the relations $l = (3/2)r$ and $L = (3/2)R$, for the crystallites and grains, respectively. In the paper, $l$ and $L$ are denoted as $t$ and $\overline{T}$, respectively.
+
+```
+@CUSTOM_CRYSEXTN
+  BC_pure  l  g  L  Gauss/Lorentz/Fresnel
+```
+where `BC_pure` represents pure primary or pure type-I and type-II secondary extinction, `l`, `g`, `L`, and `Gauss/Lorentz/Fresnel` are the same as the primary and secondary extinction model. To trigger pure primary, one has to set `g=0` and `L=0`. For pure secondary type-I or type-II, one needs to set `l=0` and `g=0`, respectively.
+
+```
+@CUSTOM_CRYSEXTN
+  BC_mod  l  g  L  Gauss/Lorentz/Fresnel
+```
+where `BC_mod` represents pure secondary extinction. The primary extinction factor $y_{\textrm{p}}$ has been fixed to 1, thus only secondary extinction is in operation. The other parameters are the same as the primary and secondary extinction model.
+
+### Cooper & Rouse's (CR's) model
+
+```
+@CUSTOM_CRYSEXTN
+  CR  l  g  L  
+```
+where `CR` represents Cooper & Rouse's extinction model, `l` is the crystallite size (Aa), g is the mosacity parameter (1/rad), and `L` is the grain size (Aa).
+
+
+## References
+
+### Sabine's model
+  - International Tables for Crystallography (2006). Vol. C, Chapter 6.4, pp. 609–616.
+### Becker & Coppens' model
+  - Acta Cryst. (1974). A30, 129
+  - Acta Cryst. (1995). A51, 662-667
+### Cooper & Rouse's model
+  - Acta Cryst. (1970). A26, 214
+  - Acta Cryst. (1976). A32, 806
 
 ## Note
 
