@@ -1,3 +1,13 @@
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//  Various extinction models are implemented, including                      //
+//    Sabine                                                                  //
+//    Becker & Coppens                                                        //
+//    Cooper & Rouse                                                          //
+//    RED (random elastic deformation)                                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "NCPhysicsModel.hh"
 
 //Include various utilities from NCrystal's internal header files:
@@ -891,83 +901,6 @@ double NCP::CrystallineExtinction::calcCrossSection( double neutron_ekin ) const
   return xs_in_barns;
 }
 
-//double NCP::CrystallineExtinction::calcCrossSection( double neutron_ekin ) const {
-//
-//  //double E_hkl, R_hkl;
-//  double ER_hkl; //E_hkl*R_hkl
-//  double xs_in_barns = 0.0;
-//
-//  const double wl = NC::ekin2wl( neutron_ekin );
-//  const double wlsq = NC::ncsquare( wl );
-//  unsigned int num_wlp = 500; //can be changed later
-//  const double mu = 0.; //contributions of absorption and incoherent scattering are removed, as in Sato et al. 2011
-//  for ( auto& hkl : hklDFM ) {
-//
-//    double F_hkl = std::sqrt(hkl.fsquared) * 1.e-4; //Aa
-//    if ( m_model_option == 0 ) {
-//      if ( m_res_option == 1 ) {
-//        double wlp_lower_bound = wl;
-//        double wlp_upper_bound = NC::ncmax( wl + 1., 2 * hkl.dspacing + 2.5 );
-//
-//        ER_hkl = 0.;
-//        for ( auto wlp : NC::linspace( wlp_lower_bound, wlp_upper_bound, num_wlp ) ) {
-//          double h_wlp = jorgensen( wlp, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//          double E_wlp = uncorr_blk_mdl( m_Nc, wlp, F_hkl, m_l, hkl.dspacing, mu, m_Gg, m_L, m_tilt_dist_option );
-//          ER_hkl += h_wlp * E_wlp;
-//        }
-//        //double h0 = jorgensen( wlp_lower_bound, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//        //R_hkl -= 0.5 * h0;
-//        //double hN = jorgensen( wlp_upper_bound, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//        //R_hkl += 0.5 * hN;
-//
-//        ER_hkl *= (wlp_upper_bound - wlp_lower_bound) / (num_wlp - 1);
-//      }
-//      else {
-//        if ( wl > 2 * hkl.dspacing )
-//          break;
-//        ER_hkl = uncorr_blk_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, mu, m_Gg, m_L, m_tilt_dist_option );
-//      }
-//    }
-//    else if ( m_model_option == 1 ) {
-//      ER_hkl = corr_blk_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, mu, m_Gg, m_L );
-//    }
-//    else if ( m_model_option == 2 ) {
-//      ER_hkl = BC_pure_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
-//    }
-//    else {
-//      ER_hkl = BC_mix_extn_mdl( m_Nc, wl, F_hkl, m_l, hkl.dspacing, m_Gg, m_L, m_tilt_dist_option );
-//    }
-//
-//    //if ( m_res_option == 1 ) {
-//    //  double wlp_lower_bound = wl;
-//    //  double wlp_upper_bound = NC::ncmax( wl + 1., 2 * hkl.dspacing + 2.5 );
-//    //
-//    //  R_hkl = 0.;
-//    //  for ( auto wlp : NC::linspace( wlp_lower_bound, wlp_upper_bound, num_wlp ) ) {
-//    //    double h_wlp = jorgensen( wlp, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//    //    R_hkl += h_wlp;
-//    //  }
-//    //  double h0 = jorgensen( wlp_lower_bound, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//    //  R_hkl -= 0.5 * h0;
-//    //  double hN = jorgensen( wlp_upper_bound, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 0 );
-//    //  R_hkl += 0.5 * hN;
-//    //
-//    //  R_hkl *= (wlp_upper_bound - wlp_lower_bound) / (num_wlp - 1);
-//    //  //R_hkl = jorgensen( wl, hkl.dspacing, m_a0, m_a1, m_b0, m_b1, m_s02, m_s12, m_s22, 1 );
-//    //}
-//    //else {
-//    //  R_hkl = 1.;
-//    //  if ( wl > 2 * hkl.dspacing )
-//    //    break;
-//    //}
-//
-//    xs_in_barns += hkl.dspacing * hkl.fsquared * hkl.multiplicity * ER_hkl;
-//  }
-//  xs_in_barns *= m_xsectfact * wlsq; //lambda^2/(2NV)
-//
-//  return xs_in_barns;
-//}
-
 NCP::CrystallineExtinction::ScatEvent NCP::CrystallineExtinction::sampleScatteringEvent( NC::RNG& rng, double neutron_ekin ) const {
 
   ScatEvent result;
@@ -1032,29 +965,4 @@ NCP::CrystallineExtinction::ScatEvent NCP::CrystallineExtinction::sampleScatteri
   }
 
   return result;
-
-  //if ( ! (neutron_ekin > m_cutoffekin) ) {
-  //Special case: We are asked to sample a scattering event for a neutron
-  //energy where we have zero cross section! Although in a real simulation we
-  //would usually not expect this to happen, users with custom code might
-  //still generate such calls. The only consistent thing to do when the cross
-  //section is zero is to not change the neutron state parameters, which means:
-  //result.ekin_final = neutron_ekin;
-  //result.mu = 1.0;
-  //return result;
-  //}
-
-  //Implement our actual model here. Of course it is trivial for the example
-  //model. For a more realistic or complicated model, it might be that
-  //additional helper classes or functions should be created and used, in order
-  //to keep the code here manageable:
-
-  //result.ekin_final = neutron_ekin;//Elastic
-  //result.mu = randIsotropicScatterMu(rng).dbl();
-
-  //Same as coherent elastic scattering
-  //result.ekin_final = neutron_ekin.dbl();
-  //result.mu = randIsotropicScatterMu(rng).dbl(); // Take isotropic first for test
-
-  // return result;
 }
