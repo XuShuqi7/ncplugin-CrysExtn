@@ -418,8 +418,19 @@ namespace NCPluginNamespace {
         }
         else {
           //xs = 2. / 3. * Q_theta * L / std::sqrt(NC::ncsquare(wl / l / sin_2theta) + 1. / (2. * g * g));
-          xs = 2. / 3. * Q_theta * L / std::sqrt(NC::ncsquare(wl / l) + NC::ncsquare(sin_2theta) / (2. * g * g));
-          ys = 1. / std::sqrt(1. + 2.12 * xs + AB_theta_s.A * NC::ncsquare(xs) / (1. + AB_theta_s.B * xs));
+		  if ( tilt_dist == 1 || tilt_dist == 3 ) {
+			xs = 2. / 3. * Q_theta * L / std::sqrt(NC::ncsquare(wl / l) + NC::ncsquare(sin_2theta) / (2. * g * g)); //Valid for Gaussian and Fresnel distributions, Eq.40(b) in Acta Cryst. (1974). A30, 129
+		  }
+		  else {
+            xs = 2. / 3. * Q_theta * L / (wl / l + sin_2theta * 2. / (3. * g)); //Valid for Lorentzian distribution, Eq.41(b) in Acta Cryst. (1974). A30, 129
+		  }
+          xs *= yp; //Correction of formula, ys also dependent on yp
+		  if ( tilt_dist == 1 ) {
+			ys = 1. / std::sqrt(1. + 2.12 * xs + AB_theta_s.A * NC::ncsquare(xs) / (1. + AB_theta_s.B * xs)); //The factor 2.12 is only applied in the case of Gaussian distribution
+		  }
+		  else {
+            ys = 1. / std::sqrt(1. + 2 * xs + AB_theta_s.A * NC::ncsquare(xs) / (1. + AB_theta_s.B * xs));
+		  }
         }
 
         return yp * ys;
