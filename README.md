@@ -8,7 +8,9 @@ It should also be noted that extinction can be classified into two types: primar
 
 The extinction models implemented in this plugin have been investigated for the transmission measurements performed on four different beryllium grades using the HIPPO instrument at Los Alamos National Laboratory, and the experimental cross-sections were interpreted using Becker & Coppens' model. 
 
-For more details, and if you use this plugin for your work, please refer and cite this publication: **Impact of extinction effects on neutron transmission and diffraction in solid beryllium metal, Journal of Applied Crystallography (under revision)**.
+## Citation
+
+For more details, and if you use this plugin for your work, please refer and cite this publication: **Impact of extinction effects on neutron transmission in solid beryllium metal, Journal of Applied Crystallography (accepted for publication)**.
 
 ## Installation
 
