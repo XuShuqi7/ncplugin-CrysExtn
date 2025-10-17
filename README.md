@@ -10,7 +10,8 @@ The extinction models implemented in this plugin have been investigated for the 
 
 ## Citation
 
-For more details, and if you use this plugin for your work, please refer and cite this publication: **Impact of extinction effects on neutron transmission in solid beryllium metal, Journal of Applied Crystallography (accepted for publication)**.
+For more details, and if you use this plugin for your work, please refer and cite this publication: S. Xu, D.D. DiJulio, J.I. Marquez Damian, S.C. Vogel, A.M. Long, T.Y. Hirsh, T. Kittelmann, V. Kuksenko and G. Muhrer (2025). J.
+Appl. Cryst. 58, https://doi.org/10.1107/S1600576725007939.**.
 
 ## Installation
 
