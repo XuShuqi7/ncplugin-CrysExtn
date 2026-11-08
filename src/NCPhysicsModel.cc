@@ -860,7 +860,14 @@ NCP::CrystallineExtinction::CrystallineExtinction( int model_option, double l, d
   nc_assert( m_s22 >= 0.0 );
 
   m_Nc = 1. / struct_info.volume; //number of unit cells per unit volume, Aa^-3
-  m_xsectfact = 0.5 / struct_info.n_atoms / struct_info.volume;
+#if NCRYSTAL_VERSION >= 4004007
+  //Average number of atoms per unit cell (lower than the number of atom
+  //positions in case of partially occupied sites):
+  const double natoms = struct_info.n_atoms_average;
+#else
+  const double natoms = struct_info.n_atoms;
+#endif
+  m_xsectfact = 0.5 / natoms / struct_info.volume;
 
   for ( auto& hkl : hklList ) {
     hklDFM.emplace_back();
